@@ -1,14 +1,14 @@
 from lyricsgenius import Genius
-import api_key
+import API_keys
 import csv
 import json
 import re
 
-client_access_token = api_key.client_access_token
+client_access_token = API_keys.genius_client_access_token
 genius = Genius(client_access_token)
 
 # Load the CSV with the songs
-file = open('songs.csv')
+file = open('songs/song_data.json')
 csvreader = csv.reader(file)
 
 # Dictionary to store data by year

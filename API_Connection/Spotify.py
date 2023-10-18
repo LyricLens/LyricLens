@@ -1,17 +1,17 @@
 import spotipy
-import api_key
+import API_keys
 import json
 import re
 from spotipy.oauth2 import SpotifyOAuth
 from lyricsgenius import Genius
 
 # Initialize the Spotify API client
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id='1671b119b2154701a1b898be32090824',
-                                               client_secret='91a829f8306943c7a3921dc0cc07fab0',
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=API_keys.spotify_client_id,
+                                               client_secret=API_keys.genius_client_access_token,
                                                redirect_uri='http://127.0.0.1:8888/callback',
                                                scope='user-top-read'))
 
-client_access_token = api_key.client_access_token
+client_access_token = API_keys.genius_client_access_token
 genius = Genius(client_access_token)
 
 csv_file = "top_50songs.csv"
