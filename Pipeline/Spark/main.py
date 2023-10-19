@@ -1,4 +1,5 @@
 import os, datetime
+import time
 from elasticsearch import Elasticsearch
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.types import *
@@ -134,31 +135,28 @@ def analyze(spark, json_path):
 
 
 es_mapping_modified = {
-    "mappings":{
-        "properties":{
-            "year":{"type":"text"},
-            "title":{"type":"text"},
-            "sentiment_neg":{"type":"text"},
-            "sentiment_neu":{"type":"text"},
-            "sentiment_pos":{"type":"text"},
-            "sentiment_compound":{"type":"text"},
-        }
-    }
+  "year":{"type":"text"},
+  "title":{"type":"text"},
+  "sentiment_neg":{"type":"text"},
+  "sentiment_neu":{"type":"text"},
+  "sentiment_pos":{"type":"text"},
+  "sentiment_compound":{"type":"text"},
 }
 
-# elastic_host = "elasticsearch"
+elastic_host = "http://localhost:9200"
 
-# elastic_topic = "tap" #TODO rename
-# elastic_index = "tap"
+elastic_topic = "tap" #TODO rename
+elastic_index = "tap"
 
-# es = Elasticsearch(hosts=elastic_host)
+es = Elasticsearch(hosts=elastic_host)
+while not es.ping():
+    time.sleep(1)
 
-
-# es.indices.create(
-#     index=elastic_index,
-#     body=es_mapping_modified,
-#     ignore=400  
-# )
+es.indices.create(
+    index=elastic_index,
+    body=es_mapping_modified,
+    ignore=400  
+)
 
 
 if __name__ == "__main__": 
@@ -185,9 +183,11 @@ if __name__ == "__main__":
   sentiment = analyze(spark, json_path='songs/song_data.json')
   sentiment.write \
     .format("org.elasticsearch.spark.sql") \
-    .option("es.nodes", "localhost") \
+    .option("es.nodes", elastic_host) \
     .option("es.port", "9200") \
-    .save("your_elasticsearch_type")
+    .option("es.nodes.wan.only", "true") \
+    .format("es") \
+    .save()
   # sentiment \
   #   .write \
   #   .option("checkpointLocation", "/tmp/checkpoints") \
