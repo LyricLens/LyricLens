@@ -4,7 +4,7 @@
   <img src="https://github.com/LyricLens/LyricLens/assets/55694345/d1d75556-62b9-4e39-89b3-364936e10bad" width=40% height=40% />
 </p><br>
 
-🎶 Throughout history, music has consistently shown us how society, culture, and human emotions evolve. Artists' lyrics have always served as potent tools, conveying the realities of their era, both with positive and negative emotions. <br>
+Throughout history, music has consistently shown us how society, culture, and human emotions evolve. Artists' lyrics have always served as potent tools, conveying the realities of their era, both with positive and negative emotions. <br>
 
 🔎 LyricLens is dedicated to performing sentiment analysis on the lyrics of the top 50 songs from selected historical years. <br>
 
