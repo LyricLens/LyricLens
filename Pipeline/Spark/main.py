@@ -109,15 +109,6 @@ def analyze(spark, json_path):
 
   rows = df.collect()
 
-  # output_schema = StructType([
-  #   StructField("year", StringType(), True),
-  #   StructField("title", StringType(), True),
-  #   StructField("sentiment_neg", StringType(), True),
-  #   StructField("sentiment_neu", StringType(), True),
-  #   StructField("sentiment_pos", StringType(), True),
-  #   StructField("sentiment_compound", StringType(), True),
-  # ])
-
   data_to_add = []
 
   labels = df.columns
@@ -125,80 +116,28 @@ def analyze(spark, json_path):
   for i, year in enumerate(rows[0]):
     for entry in year:
       sentiment = sid.polarity_scores(entry.lyrics)
-      data_to_add.append([labels[i], entry.title, sentiment["neg"], sentiment["neu"], sentiment["pos"], sentiment["compound"]])
+      data_to_add.append([labels[i], entry.title, entry.lyrics, sentiment["neg"], sentiment["neu"], sentiment["pos"], sentiment["compound"]])
 
-  columns = ["year", "title", "sentiment_neg", "sentiment_neu", "sentiment_pos", "sentiment_compound"]
+  columns = ["year", "title", "lyrics", "sentiment_neg", "sentiment_neu", "sentiment_pos", "sentiment_compound"]
   output_df = spark.createDataFrame(data_to_add, columns)
   output_df.show()
 
   return output_df
 
 
-es_mapping_modified = {
-"mappings":{
-    "properties":{
-        "year":{"type":"text"},
-        "title":{"type":"text"},
-        "sentiment_neg":{"type":"text"},
-        "sentiment_neu":{"type":"text"},
-        "sentiment_pos":{"type":"text"},
-        "sentiment_compound":{"type":"text"},
-    }
-}
-}
-
-elastic_host = "http://localhost:9200"
-
-elastic_topic = "tap" #TODO rename
-elastic_index = "tap"
-
-es_conf = {
-    "es.nodes": "elasticsearch",
-    "es.port": "9200",
-    "es.resource": "my_index/text"#es_mapping_modified
-}
-
-# es = Elasticsearch(hosts=elastic_host)
-# while not es.ping():
-#     print(f"DIO GRAN BASTARDO")
-#     time.sleep(1)
-
-# es.indices.create(
-#     index=elastic_index,
-#     body=es_mapping_modified,
-#     ignore=400  
-# )
-
-
 if __name__ == "__main__": 
-#   sparkConf = SparkConf().set("spark.app.name", "LyricsLens") \
-#       .set("es.nodes", elastic_host) \
-#       .set("es.port", "9200") \
-#       .set("spark.executor.heartbeatInterval", "200000") \
-#       .set("spark.network.timeout", "300000")
-
-#   sc = SparkContext.getOrCreate(conf=sparkConf)
-#   spark = SparkSession(sc)
-  #spark = SparkSession.builder.appName("ElasticsearchExample").getOrCreate()
-
   spark = SparkSession.builder \
       .appName("LyricsLens")\
       .master("local[8]")\
       .config("spark.driver.memory","16G")\
       .config("spark.driver.maxResultSize", "0") \
-      .config("spark.kryoserializer.buffer.max", "2000M")\
-      .config("es.nodes", elastic_host) \
+      .config("es.nodes", "http://localhost:9200") \
       .config("es.port", "9200") \
       .getOrCreate()
 
   sentiment = analyze(spark, json_path='songs/song_data.json')
   sentiment.write.format("org.elasticsearch.spark.sql") \
-    .options(**es_conf) \
+    .option("es.resource", "my_index") \
+    .option("es.nodes", "elasticsearch") \
+    .option("es.port", "9200") \
     .save()
-  # sentiment \
-  #   .write \
-  #   .option("checkpointLocation", "/tmp/checkpoints") \
-  #   .format("org.elasticsearch.spark.sql") \
-  #   .start(elastic_index) \
-  #   .awaitTermination()
-    # .format("es") \
