@@ -1,8 +1,7 @@
 lyricsgenius==3.0.1
 pyspark==3.5.0
-kafka-utils==4.1.0
 elasticsearch==8.10.1
 matplotlib==3.4.2
 requests==2.25.1
-Pillow==8.2.0
-nltk==nltk
+spotipy==2.23.0
+lyricsgenius==3.0.1

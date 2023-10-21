@@ -1,21 +1,11 @@
-import os, datetime
-import time
-from elasticsearch import Elasticsearch
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.types import *
 from pyspark.sql.functions import explode, split, col, sum, lit
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, explode
-from pyspark import SparkContext
 import json
-from pyspark.conf import SparkConf
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType
-import sys
-# sys.path.append('../../src/')  # Add the parent directory to the Python path
-# print(sys.path)
 from model import sid
-from API_Connection.Spotify import update_top_songs
-from API_Connection.API_keys import spotify_client_secret
+from API_keys import spotify_client_secret
 
 def analyze(spark, json_path):
   f = open(json_path)
@@ -144,6 +134,7 @@ if __name__ == "__main__":
     .save()
   
   if spotify_client_secret != 'YOUR CLIENT SECRET':
+        from Spotify import update_top_songs
         update_top_songs()
         new_songs = analyze(spark, json_path='songs/top_50.json')
         old_songs.write.format("org.elasticsearch.spark.sql") \
