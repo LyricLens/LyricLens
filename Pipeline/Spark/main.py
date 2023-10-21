@@ -14,7 +14,8 @@ import sys
 # sys.path.append('../../src/')  # Add the parent directory to the Python path
 # print(sys.path)
 from model import sid
-
+from API_Connection.Spotify import update_top_songs
+from API_Connection.API_keys import spotify_client_secret
 
 def analyze(spark, json_path):
   f = open(json_path)
@@ -135,9 +136,20 @@ if __name__ == "__main__":
       .config("es.port", "9200") \
       .getOrCreate()
 
-  sentiment = analyze(spark, json_path='songs/song_data.json')
-  sentiment.write.format("org.elasticsearch.spark.sql") \
+  old_songs = analyze(spark, json_path='songs/song_data.json')
+  old_songs.write.format("org.elasticsearch.spark.sql") \
     .option("es.resource", "my_index") \
     .option("es.nodes", "elasticsearch") \
     .option("es.port", "9200") \
     .save()
+  
+  if spotify_client_secret != 'YOUR CLIENT SECRET':
+        update_top_songs()
+        new_songs = analyze(spark, json_path='songs/top_50.json')
+        old_songs.write.format("org.elasticsearch.spark.sql") \
+            .option("es.resource", "my_index") \
+            .option("es.nodes", "elasticsearch") \
+            .option("es.port", "9200") \
+            .save() 
+else:
+    print("You need to configure your Spotify API Key")

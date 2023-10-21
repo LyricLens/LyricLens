@@ -1,18 +1,17 @@
 import spotipy
-import API_keys
+from API_keys import spotify_client_id, spotify_client_secret, genius_client_access_token
 import json
 import re
 from spotipy.oauth2 import SpotifyOAuth
 from lyricsgenius import Genius
 
 # Initialize the Spotify API client
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=API_keys.spotify_client_id,
-                                               client_secret=API_keys.genius_client_access_token,
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=spotify_client_id,
+                                               client_secret=spotify_client_secret,
                                                redirect_uri='http://127.0.0.1:8888/callback',
                                                scope='user-top-read'))
 
-client_access_token = API_keys.genius_client_access_token
-genius = Genius(client_access_token)
+genius = Genius(genius_client_access_token)
 
 csv_file = "top_50songs.csv"
 # Function to get the top 50 songs and update the JSON file
@@ -24,7 +23,7 @@ def update_top_songs():
 
     # Update the JSON file
     data.append([(track['track']['name'], track['track']['artists'][0]['name']) for track in top_tracks['items']])
-    with open("top50_2023.json", "w") as outfile:
+    with open("top50_now.json", "w") as outfile:
         for item in data[0]:
             try:
                 year = 2023
