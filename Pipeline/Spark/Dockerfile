@@ -1,6 +1,5 @@
 FROM jupyter/pyspark-notebook:spark-3.1.1
 
-#TODO vediamo quali di questi moduli serve e quali no e li rimuoviamo da qua, mettendoli in un requirements.txt
 WORKDIR /app
 ADD main.py .
 ADD model.py .
